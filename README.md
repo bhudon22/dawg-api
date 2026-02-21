@@ -22,10 +22,12 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ### `GET /random`
 
-Returns a single uniformly random word from the dictionary.
+Returns a single uniformly random word from the dictionary. Optionally restrict to a specific length.
 
 ```
-GET /random    → "serendipity"
+GET /random             → "serendipity"
+GET /random?length=5    → "riven"
+GET /random?length=12   → "enduringness"
 ```
 
 ---

@@ -45,10 +45,12 @@ dawg_api/
 
 ### `GET /random`
 
-Returns a single uniformly random word from the dictionary.
+Returns a single uniformly random word. Optional `length` parameter restricts to words of that exact letter count.
 
 ```
-GET /random    → "serendipity"
+GET /random             → "serendipity"
+GET /random?length=5    → "riven"
+GET /random?length=12   → "enduringness"
 ```
 
 ### `GET /count`
