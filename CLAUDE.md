@@ -53,6 +53,16 @@ GET /random?length=5    → "riven"
 GET /random?length=12   → "enduringness"
 ```
 
+### `GET /define/{word}`
+
+Proxies the [Free Dictionary API](https://dictionaryapi.dev) — no key required. Returns phonetics, parts of speech, definitions, and examples.
+
+```
+GET /define/serendipity    → full JSON entry with phonetics and definitions
+```
+
+Note: `HttpClient` registered as named client `"dictionary"` via `AddHttpClient`.
+
 ### `GET /contains/{substring}`
 
 Returns all words containing the given substring anywhere (min 2 chars). Enumerates all words via `Match("*")` and filters.

@@ -20,6 +20,7 @@ builder.Services.AddOpenApi(options =>
             | `GET /startswith/{prefix}` | `/startswith/pre` | All words beginning with prefix |
             | `GET /endswith/{suffix}` | `/endswith/ing` | All words ending with suffix |
             | `GET /contains/{substring}` | `/contains/zzle` | All words containing substring |
+            | `GET /define/{word}` | `/define/serendipity` | Word definition (via dictionaryapi.dev) |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
@@ -38,6 +39,13 @@ builder.Services.AddOpenApi(options =>
         doc.Info.Version     = "v1";
         return Task.CompletedTask;
     });
+});
+
+// HttpClient for the Free Dictionary API.
+builder.Services.AddHttpClient("dictionary", c =>
+{
+    c.BaseAddress = new Uri("https://api.dictionaryapi.dev/");
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
 // Register the DAWG dictionary as a singleton — loaded once at startup.
@@ -81,6 +89,25 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /define/serendipity
+app.MapGet("/define/{word}", async (string word, IHttpClientFactory httpFactory) =>
+{
+    var client   = httpFactory.CreateClient("dictionary");
+    var response = await client.GetAsync($"api/v2/entries/en/{Uri.EscapeDataString(word)}");
+
+    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        return Results.NotFound($"No definition found for '{word}'.");
+
+    if (!response.IsSuccessStatusCode)
+        return Results.StatusCode((int)response.StatusCode);
+
+    var json = await response.Content.ReadAsStringAsync();
+    return Results.Content(json, "application/json");
+})
+.WithName("Define")
+.WithSummary("Word definition")
+.WithDescription("Returns definitions from the Free Dictionary API (dictionaryapi.dev). Proxies the full response including phonetics, parts of speech, and example sentences.");
 
 // GET /contains/zzl
 app.MapGet("/contains/{substring}", (string substring, DawgDictionary dawg) =>

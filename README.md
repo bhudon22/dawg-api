@@ -32,6 +32,17 @@ GET /random?length=12   → "enduringness"
 
 ---
 
+### `GET /define/{word}`
+
+Returns the definition of a word via the [Free Dictionary API](https://dictionaryapi.dev). Includes phonetics, parts of speech, definitions, and example sentences.
+
+```
+GET /define/serendipity    → phonetics, noun definitions, examples
+GET /define/xyzzy          → 404 if no definition found
+```
+
+---
+
 ### `GET /contains/{substring}`
 
 Returns all words containing the given substring anywhere. Minimum 2 characters.
