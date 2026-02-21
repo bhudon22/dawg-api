@@ -1,67 +1,72 @@
-# WordScan
+# dawg-api
 
-A console application for exploring an English dictionary of 370,105 words stored as a binary DAWG (Directed Acyclic Word Graph). Use it to look up words, search by pattern, or find anagrams.
+An ASP.NET Core minimal API for querying a 370,105-word English dictionary stored as a binary DAWG (Directed Acyclic Word Graph).
 
 ## Build & Run
 
-```
-dotnet build
-dotnet run --project WordScan/WordScan.csproj
-```
-
-## Pattern Syntax
-
-Type a pattern at the `Pattern>` prompt and press Enter.
-
-### Exact lookup
-
-```
-Pattern> cat
+```bash
+dotnet run --project WordApi/WordApi.csproj
 ```
 
-Returns whether "cat" exists in the dictionary.
+Starts Kestrel on `http://localhost:5236`.
 
-### Positional patterns — `?` matches any single letter
+## Endpoints
 
-```
-Pattern> to???        five-letter words starting with "to"
-Pattern> ???er        five-letter words ending with "er"
-Pattern> t??e?        five-letter words: starts with "t", fourth letter "e"
-Pattern> ?????        all five-letter words
-```
+### `GET /contains?word=<word>`
 
-The length of the pattern is the exact length of the words returned.
-
-### Star patterns — `*` matches zero or more letters (one `*` per pattern)
+Returns `true` or `false` — exact dictionary lookup.
 
 ```
-Pattern> to*          all words starting with "to" (any length)
-Pattern> *er          all words ending with "er" (any length)
-Pattern> to*er        words starting with "to" and ending with "er"
+GET /contains?word=boxer    → true
+GET /contains?word=xyzzy    → false
 ```
 
-### Anagram search — `{letters}` matches any arrangement of the letter pool
+---
 
-Wrap the letter pool in curly braces. The number of characters inside is the exact length of the words returned. Use `?` inside the braces as a wildcard tile (any letter).
+### `GET /words?pattern=<pattern>`
+
+Returns a JSON array of all words matching the pattern.
+
+**`?` — any single letter (positional)**
 
 ```
-Pattern> {love}       four-letter words using exactly the letters l, o, v, e
-Pattern> {love?}      five-letter words using l, o, v, e, plus any one letter
-Pattern> {love??}     six-letter words using l, o, v, e, plus any two letters
+GET /words?pattern=???er        → 5-letter words ending in "er"
+GET /words?pattern=to???        → 5-letter words starting with "to"
+GET /words?pattern=?????        → all 5-letter words
 ```
 
-## Summary Table
+**`*` — any run of letters (one `*` per pattern)**
 
-| Pattern    | Meaning                                              |
-|------------|------------------------------------------------------|
-| `cat`      | exact lookup                                         |
-| `to???`    | exactly 5 letters, starting with "to"               |
-| `???er`    | exactly 5 letters, ending with "er"                 |
-| `?o?e?`    | exactly 5 letters, 2nd letter "o", 4th letter "e"   |
-| `to*`      | any length, starting with "to"                       |
-| `*er`      | any length, ending with "er"                         |
-| `to*er`    | any length, starting with "to" and ending with "er"  |
-| `{love}`   | 4-letter anagrams of "love"                          |
-| `{love?}`  | 5-letter anagrams: l, o, v, e + 1 wildcard tile     |
+```
+GET /words?pattern=to*          → all words starting with "to"
+GET /words?pattern=*er          → all words ending with "er"
+GET /words?pattern=un*ing       → words starting with "un" and ending with "ing"
+```
 
-Type `q` or `quit` to exit.
+---
+
+### `GET /anagram?letters=<letters>`
+
+Returns all words that can be formed from exactly the given letters. Word length equals the number of letters supplied. Use `?` as a wildcard tile.
+
+```
+GET /anagram?letters=stare      → ["aster","rates","stare","tears",...]
+GET /anagram?letters=love       → 4-letter anagrams of l, o, v, e
+GET /anagram?letters=love?      → 5-letter words using l, o, v, e + any one letter
+```
+
+## Pattern Reference
+
+| Example | Meaning |
+|---|---|
+| `???er` | exactly 5 letters, ending with "er" |
+| `to???` | exactly 5 letters, starting with "to" |
+| `to*` | any length, starting with "to" |
+| `*er` | any length, ending with "er" |
+| `to*er` | any length, starting with "to" and ending with "er" |
+| `stare` | anagram — all arrangements of s, t, a, r, e |
+| `love?` | anagram — l, o, v, e + one wildcard tile |
+
+## Dictionary
+
+`dawg.bin` — 370,105 English words compressed into a ~1.4 MB binary DAWG. Each node is a packed `uint32` encoding the letter, end-of-word flag, end-of-node flag, and child index.
