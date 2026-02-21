@@ -17,6 +17,7 @@ builder.Services.AddOpenApi(options =>
             |---|---|---|
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
             | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
+            | `GET /startswith/{prefix}` | `/startswith/pre` | All words beginning with prefix |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
@@ -78,6 +79,19 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /startswith/pre
+app.MapGet("/startswith/{prefix}", (string prefix, DawgDictionary dawg) =>
+{
+    if (prefix.Length > 30)
+        return Results.BadRequest("prefix must be 30 characters or fewer.");
+
+    List<string> words = dawg.Match(prefix + "*");
+    return Results.Ok(words);
+})
+.WithName("StartsWith")
+.WithSummary("Words starting with prefix")
+.WithDescription("Returns all words that begin with the given prefix.");
 
 // GET /length/5
 app.MapGet("/length/{n:int}", (int n, DawgDictionary dawg) =>

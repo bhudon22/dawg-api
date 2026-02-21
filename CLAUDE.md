@@ -53,6 +53,14 @@ GET /random?length=5    → "riven"
 GET /random?length=12   → "enduringness"
 ```
 
+### `GET /startswith/{prefix}`
+
+Returns all words beginning with the given prefix.
+
+```
+GET /startswith/pre     → ["pre","preabsorb","preach",...] (4903 words)
+```
+
 ### `GET /length/{n}`
 
 Returns all words of exactly `n` letters (1–30).
