@@ -43,6 +43,23 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /wordle/daily`
+
+Today's 5-letter word, deterministic per UTC date (`dayNumber % words.Count`).
+
+```
+GET /wordle/daily    → {"date":"2026-02-21","word":"ergon"}
+```
+
+### `GET /wordle/check?answer=&guess=`
+
+Two-pass Wordle scorer. Returns per-letter `correct`/`present`/`absent` and `solved` flag. Validates both words against the DAWG.
+
+```
+GET /wordle/check?answer=stare&guess=crane
+→ {result:[{letter:"c",result:"absent"},{letter:"r",result:"present"},...],"solved":false}
+```
+
 ### `GET /quiz`
 
 Word scramble puzzle — Fisher-Yates shuffle of a random word. Returns `scrambled`, `length`, `hint` (first letter), and `answer`. Optional `length` parameter.

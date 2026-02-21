@@ -20,6 +20,37 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /wordle/daily`
+
+Returns today's 5-letter Wordle word — deterministic per UTC date, same for all callers.
+
+```json
+GET /wordle/daily    → {"date":"2026-02-21","word":"ergon"}
+```
+
+### `GET /wordle/check`
+
+Scores a guess against an answer using Wordle rules. Both words must be the same length and valid dictionary words.
+
+```json
+GET /wordle/check?answer=stare&guess=crane
+→ {
+    "guess": "crane",
+    "result": [
+      {"letter":"c","result":"absent"},
+      {"letter":"r","result":"present"},
+      {"letter":"a","result":"correct"},
+      {"letter":"n","result":"absent"},
+      {"letter":"e","result":"correct"}
+    ],
+    "solved": false
+  }
+```
+
+Per-letter results: `correct` (right position), `present` (in word, wrong position), `absent` (not in word). Handles duplicate letters correctly.
+
+---
+
 ### `GET /quiz`
 
 Returns a word scramble puzzle — letters shuffled, with a hint and the answer for client-side reveal. Optionally restrict to a specific word length.

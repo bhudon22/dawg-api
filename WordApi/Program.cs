@@ -15,6 +15,8 @@ builder.Services.AddOpenApi(options =>
 
             | Endpoint | Example | Description |
             |---|---|---|
+            | `GET /wordle/daily` | `/wordle/daily` | Today's 5-letter Wordle word |
+            | `GET /wordle/check` | `/wordle/check?answer=stare&guess=crane` | Score a Wordle guess |
             | `GET /quiz` | `/quiz` or `/quiz?length=5` | Word scramble puzzle |
             | `GET /word-of-the-day` | `/word-of-the-day` | Same word for everyone today (changes midnight UTC) |
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
@@ -91,6 +93,67 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /wordle/daily
+app.MapGet("/wordle/daily", (DawgDictionary dawg) =>
+{
+    int dayNumber        = (int)(DateTime.UtcNow.Date - DateTime.UnixEpoch).TotalDays;
+    List<string> words   = dawg.Match("?????");
+    string word          = words[dayNumber % words.Count];
+    return Results.Ok(new { date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd"), word });
+})
+.WithName("WordleDaily")
+.WithSummary("Wordle daily word")
+.WithDescription("Returns today's 5-letter Wordle word. Deterministic per UTC date — same for all callers on the same day. Use with /wordle/check to validate guesses.");
+
+// GET /wordle/check?answer=stare&guess=crane
+app.MapGet("/wordle/check", (string answer, string guess, DawgDictionary dawg) =>
+{
+    answer = answer.ToLowerInvariant();
+    guess  = guess.ToLowerInvariant();
+
+    if (answer.Length != guess.Length)
+        return Results.BadRequest("answer and guess must be the same length.");
+    if (answer.Length < 2 || answer.Length > 15)
+        return Results.BadRequest("word length must be between 2 and 15.");
+    if (!dawg.Contains(answer))
+        return Results.BadRequest($"'{answer}' is not in the dictionary.");
+    if (!dawg.Contains(guess))
+        return Results.BadRequest($"'{guess}' is not in the dictionary.");
+
+    // Wordle scoring: two-pass to handle duplicate letters correctly.
+    var    results    = new string[guess.Length];
+    int[]  answerPool = new int[26];
+
+    // Pass 1 — exact matches (correct), build remaining letter pool.
+    for (int i = 0; i < guess.Length; i++)
+    {
+        if (guess[i] == answer[i]) results[i] = "correct";
+        else                       answerPool[answer[i] - 'a']++;
+    }
+
+    // Pass 2 — present or absent.
+    for (int i = 0; i < guess.Length; i++)
+    {
+        if (results[i] != null) continue;
+        int li = guess[i] - 'a';
+        if (answerPool[li] > 0) { results[i] = "present"; answerPool[li]--; }
+        else                      results[i] = "absent";
+    }
+
+    return Results.Ok(new
+    {
+        guess,
+        result = guess.Select((c, i) => new { letter = c.ToString(), result = results[i] }),
+        solved = results.All(r => r == "correct")
+    });
+})
+.WithName("WordleCheck")
+.WithSummary("Wordle guess checker")
+.WithDescription(
+    "Scores a guess against the answer using Wordle rules. " +
+    "Each letter gets: `correct` (right position), `present` (in word, wrong position), or `absent` (not in word). " +
+    "Handles duplicate letters correctly with a two-pass algorithm.");
 
 // GET /quiz
 // GET /quiz?length=5
