@@ -43,142 +43,42 @@ dawg_api/
 
 ## API Endpoints
 
-### `GET /rhymes/{word}`
+### Lookup
 
-Spelling-based rhyme: finds last vowel, takes suffix from there, calls `Match("*" + suffix)`. Returns `{ word, suffix, rhymes[] }`.
+| Endpoint | Description |
+|---|---|
+| `GET /count` | Total word count → `370105` |
+| `GET /contains?word=boxer` | Exact lookup → `true`/`false` |
+| `GET /define/{word}` | Definition via dictionaryapi.dev (no key) |
 
-```
-GET /rhymes/light    → suffix "ight", 339 rhymes
-GET /rhymes/cat      → suffix "at", many rhymes
-```
+### Search
 
-### `GET /wordle/daily`
+| Endpoint | Description |
+|---|---|
+| `GET /words?pattern=???er` | Pattern match (`?`=single letter, `*`=run of letters) |
+| `GET /anagram?letters=stare` | Anagram search (`?`=wildcard tile, word length = letters length) |
+| `GET /length/{n}` | All words of exactly n letters (1–30) |
+| `GET /startswith/{prefix}` | All words beginning with prefix |
+| `GET /endswith/{suffix}` | All words ending with suffix |
+| `GET /contains/{substring}` | All words containing substring (min 2 chars, enumerates all via `Match("*")`) |
+| `GET /rhymes/{word}` | Spelling-based rhyme: suffix from last vowel onward → `{ word, suffix, rhymes[] }` |
 
-Today's 5-letter word, deterministic per UTC date (`dayNumber % words.Count`).
+### Random / Daily
 
-```
-GET /wordle/daily    → {"date":"2026-02-21","word":"ergon"}
-```
+| Endpoint | Description |
+|---|---|
+| `GET /random` | Uniformly random word (selects Nth word in DFS order) |
+| `GET /random?length=5` | Random word of exactly 5 letters |
+| `GET /word-of-the-day` | Deterministic daily word → `{ date, word }` (seeded by UTC day number) |
 
-### `GET /wordle/check?answer=&guess=`
+### Games
 
-Two-pass Wordle scorer. Returns per-letter `correct`/`present`/`absent` and `solved` flag. Validates both words against the DAWG.
-
-```
-GET /wordle/check?answer=stare&guess=crane
-→ {result:[{letter:"c",result:"absent"},{letter:"r",result:"present"},...],"solved":false}
-```
-
-### `GET /quiz`
-
-Word scramble puzzle — Fisher-Yates shuffle of a random word. Returns `scrambled`, `length`, `hint` (first letter), and `answer`. Optional `length` parameter.
-
-```
-GET /quiz           → {"scrambled":"lgninaialc","length":10,"hint":"Starts with 'a'","answer":"alliancing"}
-GET /quiz?length=5  → {"scrambled":"saurh","length":5,"hint":"Starts with 's'","answer":"surah"}
-```
-
-### `GET /word-of-the-day`
-
-Returns `{ date, word }` — deterministic per UTC day. Seeded with `(int)(DateTime.UtcNow.Date - UnixEpoch).TotalDays` so the word is consistent for all callers on the same day.
-
-```
-GET /word-of-the-day    → {"date":"2026-02-21","word":"asklent"}
-```
-
-### `GET /random`
-
-Returns a single uniformly random word. Optional `length` parameter restricts to words of that exact letter count.
-
-```
-GET /random             → "serendipity"
-GET /random?length=5    → "riven"
-GET /random?length=12   → "enduringness"
-```
-
-### `GET /define/{word}`
-
-Proxies the [Free Dictionary API](https://dictionaryapi.dev) — no key required. Returns phonetics, parts of speech, definitions, and examples.
-
-```
-GET /define/serendipity    → full JSON entry with phonetics and definitions
-```
-
-Note: `HttpClient` registered as named client `"dictionary"` via `AddHttpClient`.
-
-### `GET /contains/{substring}`
-
-Returns all words containing the given substring anywhere (min 2 chars). Enumerates all words via `Match("*")` and filters.
-
-```
-GET /contains/zzle    → ["dazzle","fizzle","puzzle","sizzle",...] (151 words)
-```
-
-### `GET /endswith/{suffix}`
-
-Returns all words ending with the given suffix.
-
-```
-GET /endswith/ing    → ["aahing","abandoning",...] (18119 words)
-```
-
-### `GET /startswith/{prefix}`
-
-Returns all words beginning with the given prefix.
-
-```
-GET /startswith/pre     → ["pre","preabsorb","preach",...] (4903 words)
-```
-
-### `GET /length/{n}`
-
-Returns all words of exactly `n` letters (1–30).
-
-```
-GET /length/3    → ["aah","aal","aba",...] (2130 words)
-GET /length/5    → all 5-letter words
-```
-
-### `GET /count`
-
-Returns the total number of words in the dictionary.
-
-```
-GET /count    → 370105
-```
-
-### `GET /contains?word=<word>`
-
-Exact lookup — returns `true` or `false`.
-
-```
-GET /contains?word=boxer        → true
-GET /contains?word=xyzzy        → false
-```
-
-### `GET /words?pattern=<pattern>`
-
-Pattern match — returns a JSON array of all words matching the pattern.
-
-```
-GET /words?pattern=???er        → ["boxer","cider","diner","diver",...]
-GET /words?pattern=un*ing       → all words starting with "un" and ending in "ing"
-```
-
-Pattern syntax:
-- `?` — any single letter (positional)
-- `*` — any run of letters (variable length, one `*` per pattern)
-
-### `GET /anagram?letters=<letters>`
-
-Anagram search — returns all dictionary words that can be formed from exactly the given letters (word length = letters length).
-
-```
-GET /anagram?letters=stare      → ["aster","rates","stare","tears",...]
-GET /anagram?letters=love?      → ["clove","glove","lover","novel","olive",...]
-```
-
-Use `?` in the letters pool as a wildcard tile (matches any letter).
+| Endpoint | Description |
+|---|---|
+| `GET /quiz` | Word scramble: Fisher-Yates shuffle → `{ scrambled, length, hint, answer }` |
+| `GET /quiz?length=5` | Scramble restricted to 5-letter words |
+| `GET /wordle/daily` | Today's 5-letter Wordle word (deterministic, `dayNumber % words.Count`) |
+| `GET /wordle/check?answer=stare&guess=crane` | Two-pass Wordle scorer → per-letter `correct`/`present`/`absent` + `solved` |
 
 ## Architecture
 
