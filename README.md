@@ -18,6 +18,16 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /count`
+
+Returns the total number of words in the dictionary.
+
+```
+GET /count    → 370105
+```
+
+---
+
 ### `GET /contains?word=<word>`
 
 Returns `true` or `false` — exact dictionary lookup.
