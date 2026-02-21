@@ -20,6 +20,16 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /random`
+
+Returns a single uniformly random word from the dictionary.
+
+```
+GET /random    → "serendipity"
+```
+
+---
+
 ### `GET /count`
 
 Returns the total number of words in the dictionary.

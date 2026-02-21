@@ -43,6 +43,14 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /random`
+
+Returns a single uniformly random word from the dictionary.
+
+```
+GET /random    → "serendipity"
+```
+
 ### `GET /count`
 
 Returns the total number of words in the dictionary.
@@ -103,6 +111,7 @@ Use `?` in the letters pool as a wildcard tile (matches any letter).
 
 - `Load(path)` — reads file, returns instance
 - `Count` — total word count, computed via DFS traversal at load time
+- `Random(rng)` — uniformly random word, selects Nth word in DFS order
 - `Contains(word)` — exact lookup, O(word length)
 - `Match(pattern)` — positional (`?` = any single letter) and star (`*` = any run of letters, one per pattern)
 - `Anagram(letters)` — bag-based DFS; `?` in the pool is a wildcard tile; word length = pool length

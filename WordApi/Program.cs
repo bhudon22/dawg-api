@@ -15,6 +15,7 @@ builder.Services.AddOpenApi(options =>
 
             | Endpoint | Example | Description |
             |---|---|---|
+            | `GET /random` | `/random` | Random word |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
