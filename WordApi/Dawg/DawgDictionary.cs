@@ -44,6 +44,35 @@ public class DawgDictionary
     // Public API
     // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// Returns a uniformly random word by selecting the Nth word in DFS order.
+    /// </summary>
+    public string Random(System.Random rng)
+    {
+        int target = rng.Next(Count);
+        int seen   = 0;
+        return FindNth(0, target, ref seen, new char[32], 0)!;
+    }
+
+    private string? FindNth(uint node, int target, ref int seen, char[] buf, int depth)
+    {
+        foreach (DawgEdge edge in Siblings(node))
+        {
+            buf[depth] = edge.Letter;
+            if (edge.IsEndOfWord)
+            {
+                if (seen == target) return new string(buf, 0, depth + 1);
+                seen++;
+            }
+            if (edge.NextIndex != 0)
+            {
+                string? result = FindNth(edge.NextIndex, target, ref seen, buf, depth + 1);
+                if (result != null) return result;
+            }
+        }
+        return null;
+    }
+
     /// <summary>Exact word lookup. O(word length).</summary>
     public bool Contains(string word)
     {

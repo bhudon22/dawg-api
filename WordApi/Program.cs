@@ -53,6 +53,13 @@ app.MapScalarApiReference(options =>
     options.Title = "DAWG Word API";
 });
 
+// GET /random
+var rng = System.Random.Shared;
+app.MapGet("/random", (DawgDictionary dawg) => Results.Ok(dawg.Random(rng)))
+.WithName("Random")
+.WithSummary("Random word")
+.WithDescription("Returns a single uniformly random word from the dictionary.");
+
 // GET /count
 app.MapGet("/count", (DawgDictionary dawg) => Results.Ok(dawg.Count))
 .WithName("Count")
