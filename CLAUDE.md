@@ -33,12 +33,12 @@ dawg_api/
 │   └── Dawg/
 │       ├── DawgEdge.cs
 │       └── DawgDictionary.cs
-└── WordApi/                        # NEW — ASP.NET Core minimal API
-    ├── WordApi.csproj
-    ├── Program.cs                  # Minimal API setup, DI, endpoint registration
+└── WordApi/                        # ASP.NET Core minimal API
+    ├── WordApi.csproj              # Packages: Microsoft.AspNetCore.OpenApi 9.x, Scalar.AspNetCore
+    ├── Program.cs                  # DI, OpenAPI/Scalar setup, endpoint registration
     └── Dawg/
         ├── DawgEdge.cs             # Readonly struct decoding a single uint32 DAWG edge
-        └── DawgDictionary.cs       # Loads dawg.bin; exposes Contains, Match, Anagram
+        └── DawgDictionary.cs       # Loads dawg.bin; exposes Count, Contains, Match, Anagram
 ```
 
 ## API Endpoints
@@ -102,15 +102,23 @@ Use `?` in the letters pool as a wildcard tile (matches any letter).
 ### DawgDictionary public API
 
 - `Load(path)` — reads file, returns instance
+- `Count` — total word count, computed via DFS traversal at load time
 - `Contains(word)` — exact lookup, O(word length)
 - `Match(pattern)` — positional (`?` = any single letter) and star (`*` = any run of letters, one per pattern)
 - `Anagram(letters)` — bag-based DFS; `?` in the pool is a wildcard tile; word length = pool length
 
 Full API reference: `DawgDictionary-API.md`. Full format spec: `dawg_format.txt`.
 
+## API Docs
+
+- Scalar UI: `http://localhost:5236/scalar/v1` — interactive docs with live test client
+- OpenAPI JSON: `http://localhost:5236/openapi/v1.json`
+
 ## Design Decisions
 
 - ASP.NET Core minimal API (not MVC) — clean and lightweight
 - `DawgDictionary` registered as a singleton service via DI
 - `dawg.bin` path resolved via `AppContext.BaseDirectory` (output dir) — not `ContentRootPath`
+- OpenAPI via `Microsoft.AspNetCore.OpenApi` 9.x (pin to `9.*` — NuGet defaults to 10.x which requires .NET 10)
+- Scalar UI via `Scalar.AspNetCore` for interactive docs
 - Local hosting with `dotnet run` is sufficient for now (future: MonoGame word game backend)
