@@ -43,6 +43,14 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /count`
+
+Returns the total number of words in the dictionary.
+
+```
+GET /count    → 370105
+```
+
 ### `GET /contains?word=<word>`
 
 Exact lookup — returns `true` or `false`.
