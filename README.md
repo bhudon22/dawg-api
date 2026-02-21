@@ -20,6 +20,16 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /word-of-the-day`
+
+Returns a deterministic word for the current UTC date — the same word for all callers on the same day, changing at midnight UTC.
+
+```json
+GET /word-of-the-day    → {"date":"2026-02-21","word":"asklent"}
+```
+
+---
+
 ### `GET /random`
 
 Returns a single uniformly random word from the dictionary. Optionally restrict to a specific length.

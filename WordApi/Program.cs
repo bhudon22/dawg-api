@@ -15,6 +15,7 @@ builder.Services.AddOpenApi(options =>
 
             | Endpoint | Example | Description |
             |---|---|---|
+            | `GET /word-of-the-day` | `/word-of-the-day` | Same word for everyone today (changes midnight UTC) |
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
             | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
             | `GET /startswith/{prefix}` | `/startswith/pre` | All words beginning with prefix |
@@ -149,6 +150,17 @@ app.MapGet("/startswith/{prefix}", (string prefix, DawgDictionary dawg) =>
 .WithName("StartsWith")
 .WithSummary("Words starting with prefix")
 .WithDescription("Returns all words that begin with the given prefix.");
+
+// GET /word-of-the-day
+app.MapGet("/word-of-the-day", (DawgDictionary dawg) =>
+{
+    int dayNumber = (int)(DateTime.UtcNow.Date - DateTime.UnixEpoch).TotalDays;
+    string word   = dawg.Random(new System.Random(dayNumber));
+    return Results.Ok(new { date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd"), word });
+})
+.WithName("WordOfTheDay")
+.WithSummary("Word of the day")
+.WithDescription("Returns a deterministic word for the current UTC date. The word is the same for all callers on the same day and changes at midnight UTC.");
 
 // GET /length/5
 app.MapGet("/length/{n:int}", (int n, DawgDictionary dawg) =>

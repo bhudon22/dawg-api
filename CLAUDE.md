@@ -43,6 +43,14 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /word-of-the-day`
+
+Returns `{ date, word }` — deterministic per UTC day. Seeded with `(int)(DateTime.UtcNow.Date - UnixEpoch).TotalDays` so the word is consistent for all callers on the same day.
+
+```
+GET /word-of-the-day    → {"date":"2026-02-21","word":"asklent"}
+```
+
 ### `GET /random`
 
 Returns a single uniformly random word. Optional `length` parameter restricts to words of that exact letter count.
