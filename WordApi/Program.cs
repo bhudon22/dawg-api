@@ -55,11 +55,28 @@ app.MapScalarApiReference(options =>
 });
 
 // GET /random
+// GET /random?length=5
 var rng = System.Random.Shared;
-app.MapGet("/random", (DawgDictionary dawg) => Results.Ok(dawg.Random(rng)))
+app.MapGet("/random", (DawgDictionary dawg, int? length) =>
+{
+    if (length.HasValue)
+    {
+        if (length.Value < 1 || length.Value > 30)
+            return Results.BadRequest("length must be between 1 and 30.");
+
+        List<string> words = dawg.Match(new string('?', length.Value));
+        if (words.Count == 0)
+            return Results.NotFound($"No words of length {length.Value} in the dictionary.");
+
+        return Results.Ok(words[rng.Next(words.Count)]);
+    }
+    return Results.Ok(dawg.Random(rng));
+})
 .WithName("Random")
 .WithSummary("Random word")
-.WithDescription("Returns a single uniformly random word from the dictionary.");
+.WithDescription(
+    "Returns a single uniformly random word from the dictionary. " +
+    "Optionally supply `length` to restrict to words of that exact letter count.");
 
 // GET /count
 app.MapGet("/count", (DawgDictionary dawg) => Results.Ok(dawg.Count))
