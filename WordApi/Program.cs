@@ -18,6 +18,7 @@ builder.Services.AddOpenApi(options =>
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
             | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
             | `GET /startswith/{prefix}` | `/startswith/pre` | All words beginning with prefix |
+            | `GET /endswith/{suffix}` | `/endswith/ing` | All words ending with suffix |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
@@ -79,6 +80,19 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /endswith/ing
+app.MapGet("/endswith/{suffix}", (string suffix, DawgDictionary dawg) =>
+{
+    if (suffix.Length > 30)
+        return Results.BadRequest("suffix must be 30 characters or fewer.");
+
+    List<string> words = dawg.Match("*" + suffix);
+    return Results.Ok(words);
+})
+.WithName("EndsWith")
+.WithSummary("Words ending with suffix")
+.WithDescription("Returns all words that end with the given suffix.");
 
 // GET /startswith/pre
 app.MapGet("/startswith/{prefix}", (string prefix, DawgDictionary dawg) =>

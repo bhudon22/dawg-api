@@ -53,6 +53,14 @@ GET /random?length=5    → "riven"
 GET /random?length=12   → "enduringness"
 ```
 
+### `GET /endswith/{suffix}`
+
+Returns all words ending with the given suffix.
+
+```
+GET /endswith/ing    → ["aahing","abandoning",...] (18119 words)
+```
+
 ### `GET /startswith/{prefix}`
 
 Returns all words beginning with the given prefix.
