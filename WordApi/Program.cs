@@ -16,6 +16,7 @@ builder.Services.AddOpenApi(options =>
             | Endpoint | Example | Description |
             |---|---|---|
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
+            | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
@@ -77,6 +78,19 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /length/5
+app.MapGet("/length/{n:int}", (int n, DawgDictionary dawg) =>
+{
+    if (n < 1 || n > 30)
+        return Results.BadRequest("Length must be between 1 and 30.");
+
+    List<string> words = dawg.Match(new string('?', n));
+    return Results.Ok(words);
+})
+.WithName("ByLength")
+.WithSummary("Words by length")
+.WithDescription("Returns all words of exactly the given letter count.");
 
 // GET /count
 app.MapGet("/count", (DawgDictionary dawg) => Results.Ok(dawg.Count))

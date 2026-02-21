@@ -32,6 +32,17 @@ GET /random?length=12   → "enduringness"
 
 ---
 
+### `GET /length/{n}`
+
+Returns all words of exactly `n` letters.
+
+```
+GET /length/3    → ["aah","aal","aba",...] (2130 words)
+GET /length/5    → all 5-letter words
+```
+
+---
+
 ### `GET /count`
 
 Returns the total number of words in the dictionary.
