@@ -10,6 +10,12 @@ dotnet run --project WordApi/WordApi.csproj
 
 Starts Kestrel on `http://localhost:5236`.
 
+## API Docs
+
+Interactive docs (Scalar UI): **http://localhost:5236/scalar/v1**
+
+Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
+
 ## Endpoints
 
 ### `GET /contains?word=<word>`
