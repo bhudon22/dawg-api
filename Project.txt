@@ -1,0 +1,51 @@
+# Project Brief: DAWG Word API
+
+## Context
+
+We have an existing C# DAWG (Directed Acyclic Word Graph) loader that reads a pre-built binary dictionary file. We want to wrap it in a simple ASP.NET Core minimal API to enable pattern-based word queries.
+
+## Existing Work
+
+- **DAWG compressor**: written in C, compresses a 370k English word dictionary
+- **Source dictionary**: 4.5MB plain text file (~370,000 English words)
+- **Output**: 1.4MB binary file of packed unsigned 32-bit integers
+- **C# loader**: already written, reads the binary DAWG file and supports pattern matching
+- **Example query**: find all 5-letter words ending in “er” → pattern `???er`
+
+## Node Structure
+
+Each node is a packed uint32 containing:
+
+- Character value
+- End-of-word flag
+- Last-child flag
+- Child node offset/index
+
+## Goal
+
+Wrap the existing C# DAWG loader into an **ASP.NET Core minimal API** with a simple REST endpoint:
+
+```
+GET /words?pattern=???er
+```
+
+Returns a JSON array of all matching words.
+
+## Steps to Implement
+
+1. Create new project: `dotnet new web -n WordApi`
+1. Integrate existing DAWG loader as a singleton service
+1. Add pattern matching endpoint
+1. Test locally with `dotnet run` (Kestrel on localhost:5000)
+
+## Key Decisions
+
+- Use ASP.NET Core minimal API (not MVC) — clean and lightweight
+- Use dependency injection for the DAWG loader service
+- `?` represents a wildcard single character in patterns
+- Possibly support `*` for variable length wildcards later
+
+## Notes
+
+- This could eventually serve as a backend for a MonoGame word game
+- Keep it simple for now — local hosting with `dotnet run` is sufficient
