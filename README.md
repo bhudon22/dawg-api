@@ -32,6 +32,17 @@ GET /random?length=12   → "enduringness"
 
 ---
 
+### `GET /contains/{substring}`
+
+Returns all words containing the given substring anywhere. Minimum 2 characters.
+
+```
+GET /contains/zzle    → ["dazzle","fizzle","puzzle","sizzle",...] (151 words)
+GET /contains/tion    → all words containing "tion"
+```
+
+---
+
 ### `GET /endswith/{suffix}`
 
 Returns all words ending with the given suffix.

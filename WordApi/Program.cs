@@ -19,6 +19,7 @@ builder.Services.AddOpenApi(options =>
             | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
             | `GET /startswith/{prefix}` | `/startswith/pre` | All words beginning with prefix |
             | `GET /endswith/{suffix}` | `/endswith/ing` | All words ending with suffix |
+            | `GET /contains/{substring}` | `/contains/zzle` | All words containing substring |
             | `GET /count` | `/count` | Total word count |
             | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
             | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
@@ -80,6 +81,21 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /contains/zzl
+app.MapGet("/contains/{substring}", (string substring, DawgDictionary dawg) =>
+{
+    if (substring.Length < 2 || substring.Length > 30)
+        return Results.BadRequest("substring must be between 2 and 30 characters.");
+
+    List<string> matches = dawg.Match("*")
+        .Where(w => w.Contains(substring, StringComparison.Ordinal))
+        .ToList();
+    return Results.Ok(matches);
+})
+.WithName("ContainsSubstring")
+.WithSummary("Words containing substring")
+.WithDescription("Returns all words that contain the given substring anywhere. Minimum 2 characters.");
 
 // GET /endswith/ing
 app.MapGet("/endswith/{suffix}", (string suffix, DawgDictionary dawg) =>
