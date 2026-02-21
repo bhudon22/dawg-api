@@ -8,7 +8,28 @@ builder.Services.AddOpenApi(options =>
     options.AddDocumentTransformer((doc, _, _) =>
     {
         doc.Info.Title       = "DAWG Word API";
-        doc.Info.Description = "Query a 370,105-word English dictionary compressed as a binary DAWG.";
+        doc.Info.Description = """
+            Query a 370,105-word English dictionary compressed as a binary DAWG.
+
+            ## Endpoints
+
+            | Endpoint | Example | Description |
+            |---|---|---|
+            | `GET /count` | `/count` | Total word count |
+            | `GET /contains` | `/contains?word=boxer` | Exact lookup — returns `true`/`false` |
+            | `GET /words` | `/words?pattern=???er` | Pattern match — returns matching words |
+            | `GET /anagram` | `/anagram?letters=stare` | Anagram search — returns all arrangements |
+
+            ## Pattern Syntax
+
+            - `?` — any single letter: `???er` → 5-letter words ending in "er"
+            - `*` — any run of letters (one per pattern): `un*ing` → words starting with "un", ending with "ing"
+
+            ## Anagram Syntax
+
+            - `stare` → all words using exactly s, t, a, r, e
+            - `love?` → 5-letter words using l, o, v, e + one wildcard tile
+            """;
         doc.Info.Version     = "v1";
         return Task.CompletedTask;
     });
