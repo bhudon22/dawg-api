@@ -20,6 +20,17 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /rhymes/{word}`
+
+Returns words that rhyme with the given word. Rhyme is approximated by matching the spelling from the last vowel onward — spelling-based, not phonetic.
+
+```
+GET /rhymes/light    → suffix "ight" → ["airtight","blight","bright","fight","night",...] (339 words)
+GET /rhymes/cat      → suffix "at"  → ["bat","chat","fat","flat","hat","mat","rat",...]
+```
+
+---
+
 ### `GET /wordle/daily`
 
 Returns today's 5-letter Wordle word — deterministic per UTC date, same for all callers.

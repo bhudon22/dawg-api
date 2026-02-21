@@ -43,6 +43,15 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /rhymes/{word}`
+
+Spelling-based rhyme: finds last vowel, takes suffix from there, calls `Match("*" + suffix)`. Returns `{ word, suffix, rhymes[] }`.
+
+```
+GET /rhymes/light    → suffix "ight", 339 rhymes
+GET /rhymes/cat      → suffix "at", many rhymes
+```
+
 ### `GET /wordle/daily`
 
 Today's 5-letter word, deterministic per UTC date (`dayNumber % words.Count`).

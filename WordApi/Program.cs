@@ -15,6 +15,7 @@ builder.Services.AddOpenApi(options =>
 
             | Endpoint | Example | Description |
             |---|---|---|
+            | `GET /rhymes/{word}` | `/rhymes/light` | Words that rhyme (spelling-based) |
             | `GET /wordle/daily` | `/wordle/daily` | Today's 5-letter Wordle word |
             | `GET /wordle/check` | `/wordle/check?answer=stare&guess=crane` | Score a Wordle guess |
             | `GET /quiz` | `/quiz` or `/quiz?length=5` | Word scramble puzzle |
@@ -93,6 +94,36 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /rhymes/light
+app.MapGet("/rhymes/{word}", (string word, DawgDictionary dawg) =>
+{
+    word = word.ToLowerInvariant();
+
+    if (!dawg.Contains(word))
+        return Results.NotFound($"'{word}' is not in the dictionary.");
+
+    // Rhyme suffix = everything from the last vowel onward.
+    int lastVowel = -1;
+    for (int i = word.Length - 1; i >= 0; i--)
+        if ("aeiou".Contains(word[i])) { lastVowel = i; break; }
+
+    if (lastVowel == -1)
+        return Results.BadRequest($"'{word}' has no vowel — cannot determine rhyme.");
+
+    string suffix = word[lastVowel..];
+    List<string> rhymes = dawg.Match("*" + suffix)
+        .Where(w => w != word)
+        .ToList();
+
+    return Results.Ok(new { word, suffix, rhymes });
+})
+.WithName("Rhymes")
+.WithSummary("Rhyming words")
+.WithDescription(
+    "Returns words that rhyme with the given word. " +
+    "Rhyme is approximated by matching the spelling from the last vowel onward " +
+    "(e.g. 'light' → suffix 'ight'). Spelling-based, not phonetic.");
 
 // GET /wordle/daily
 app.MapGet("/wordle/daily", (DawgDictionary dawg) =>
