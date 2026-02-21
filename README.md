@@ -14,6 +14,8 @@ Starts Kestrel on `http://localhost:5236`.
 
 Interactive docs (Scalar UI): **http://localhost:5236/scalar/v1**
 
+The Scalar page includes a full endpoint table, pattern/anagram syntax guide, and a live test client for each endpoint.
+
 Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
