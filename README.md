@@ -20,6 +20,17 @@ Raw OpenAPI JSON: http://localhost:5236/openapi/v1.json
 
 ## Endpoints
 
+### `GET /quiz`
+
+Returns a word scramble puzzle — letters shuffled, with a hint and the answer for client-side reveal. Optionally restrict to a specific word length.
+
+```json
+GET /quiz           → {"scrambled":"lgninaialc","length":10,"hint":"Starts with 'a'","answer":"alliancing"}
+GET /quiz?length=5  → {"scrambled":"saurh","length":5,"hint":"Starts with 's'","answer":"surah"}
+```
+
+---
+
 ### `GET /word-of-the-day`
 
 Returns a deterministic word for the current UTC date — the same word for all callers on the same day, changing at midnight UTC.

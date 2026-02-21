@@ -43,6 +43,15 @@ dawg_api/
 
 ## API Endpoints
 
+### `GET /quiz`
+
+Word scramble puzzle — Fisher-Yates shuffle of a random word. Returns `scrambled`, `length`, `hint` (first letter), and `answer`. Optional `length` parameter.
+
+```
+GET /quiz           → {"scrambled":"lgninaialc","length":10,"hint":"Starts with 'a'","answer":"alliancing"}
+GET /quiz?length=5  → {"scrambled":"saurh","length":5,"hint":"Starts with 's'","answer":"surah"}
+```
+
 ### `GET /word-of-the-day`
 
 Returns `{ date, word }` — deterministic per UTC day. Seeded with `(int)(DateTime.UtcNow.Date - UnixEpoch).TotalDays` so the word is consistent for all callers on the same day.

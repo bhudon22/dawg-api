@@ -15,6 +15,7 @@ builder.Services.AddOpenApi(options =>
 
             | Endpoint | Example | Description |
             |---|---|---|
+            | `GET /quiz` | `/quiz` or `/quiz?length=5` | Word scramble puzzle |
             | `GET /word-of-the-day` | `/word-of-the-day` | Same word for everyone today (changes midnight UTC) |
             | `GET /random` | `/random` or `/random?length=5` | Random word (optional exact length) |
             | `GET /length/{n}` | `/length/5` | All words of exactly n letters |
@@ -90,6 +91,42 @@ app.MapGet("/random", (DawgDictionary dawg, int? length) =>
 .WithDescription(
     "Returns a single uniformly random word from the dictionary. " +
     "Optionally supply `length` to restrict to words of that exact letter count.");
+
+// GET /quiz
+// GET /quiz?length=5
+app.MapGet("/quiz", (DawgDictionary dawg, int? length) =>
+{
+    string word = length.HasValue
+        ? dawg.Match(new string('?', length.Value)) is { Count: > 0 } pool
+            ? pool[rng.Next(pool.Count)]
+            : null!
+        : dawg.Random(rng);
+
+    if (word is null)
+        return Results.NotFound($"No words of length {length} in the dictionary.");
+
+    // Fisher-Yates shuffle
+    char[] letters = word.ToCharArray();
+    for (int i = letters.Length - 1; i > 0; i--)
+    {
+        int j = rng.Next(i + 1);
+        (letters[i], letters[j]) = (letters[j], letters[i]);
+    }
+
+    return Results.Ok(new
+    {
+        scrambled = new string(letters),
+        length    = word.Length,
+        hint      = $"Starts with '{word[0]}'",
+        answer    = word
+    });
+})
+.WithName("Quiz")
+.WithSummary("Word scramble quiz")
+.WithDescription(
+    "Returns a scrambled word puzzle. " +
+    "Optionally supply `length` to control word length. " +
+    "The response includes the scrambled letters, a hint, and the answer for client-side reveal.");
 
 // GET /define/serendipity
 app.MapGet("/define/{word}", async (string word, IHttpClientFactory httpFactory) =>
