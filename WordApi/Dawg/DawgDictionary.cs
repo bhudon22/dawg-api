@@ -4,7 +4,11 @@ public class DawgDictionary
 {
     private readonly uint[] _data;
 
-    private DawgDictionary(uint[] data) => _data = data;
+    private DawgDictionary(uint[] data)
+    {
+        _data = data;
+        Count = ComputeCount();
+    }
 
     public static DawgDictionary Load(string path)
     {
@@ -15,6 +19,26 @@ public class DawgDictionary
     }
 
     public int EdgeCount => _data.Length;
+
+    /// <summary>Total number of words in the dictionary, computed once at load time.</summary>
+    public int Count { get; }
+
+    private int ComputeCount()
+    {
+        int count = 0;
+        CountRecurse(0, ref count);
+        return count;
+    }
+
+    private void CountRecurse(uint node, ref int count)
+    {
+        foreach (DawgEdge edge in Siblings(node))
+        {
+            if (edge.IsEndOfWord) count++;
+            if (edge.NextIndex != 0)
+                CountRecurse(edge.NextIndex, ref count);
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Public API

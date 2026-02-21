@@ -32,6 +32,12 @@ app.MapScalarApiReference(options =>
     options.Title = "DAWG Word API";
 });
 
+// GET /count
+app.MapGet("/count", (DawgDictionary dawg) => Results.Ok(dawg.Count))
+.WithName("Count")
+.WithSummary("Word count")
+.WithDescription("Returns the total number of words in the dictionary.");
+
 // GET /contains?word=boxer
 app.MapGet("/contains", (string word, DawgDictionary dawg) =>
 {
